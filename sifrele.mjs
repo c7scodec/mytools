@@ -74,6 +74,7 @@ const IKONLAR = {
   rtu: cizgi('<rect x="3" y="7" width="18" height="12" rx="2"/><circle cx="15" cy="13" r="3.5"/><path d="M15 9.5v7M11.5 13h7"/><path d="M6 10.5h3M6 13h3M6 15.5h3"/><path d="M7 7V5h10v2"/>'),
   nem: cizgi('<path d="M9 21a4 4 0 0 1-4-4c0-2.6 4-7 4-7s4 4.4 4 7a4 4 0 0 1-4 4z"/><path d="M15 4c1.2 1-1.2 2 0 3s-1.2 2 0 3M19 4c1.2 1-1.2 2 0 3s-1.2 2 0 3"/>'),
   sukacagi: cizgi('<path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/><path d="M12 8.5s-2.5 2.7-2.5 4.4a2.5 2.5 0 0 0 5 0c0-1.7-2.5-4.4-2.5-4.4z"/>'),
+  plan: cizgi('<path d="M3 20h18"/><path d="M4.5 20V9.5L10 5l5.5 4.5V20"/><path d="M9 20v-4.5h2.5V20"/><circle cx="18" cy="16" r="2.6"/><path d="M18 13.4V9h2.5"/>'),
   varsayilan: cizgi('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12h6M12 9v6"/>'),
 };
 const ORTAK_CSS = oku(join(KOK, 'sablon', 'ortak.css')).trim();
