@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Araçlarım</title>
+<link rel="icon" href="{{FAVICON}}">
+<style>
+{{ORTAK_CSS}}
+/* ---------- Araç listesi (girişten sonra) ---------- */
+body.acik{place-items:start center;padding:48px 20px 40px}
+#liste{width:100%;max-width:980px}
+#liste[hidden]{display:none}
+.ust{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px;animation:panelIn .55s var(--ease) both}
+.ust .logo{margin:0}
+.ust h1{font-size:24px}
+.hafif{font:inherit;font-size:13px;font-weight:600;color:var(--ink-2);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 14px;cursor:pointer;
+  transition:border-color .16s,color .16s,background .16s,transform .12s var(--ease)}
+.hafif:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.izgara{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.arac{--i:0;position:relative;display:flex;flex-direction:column;gap:14px;min-height:196px;padding:22px 22px 18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  box-shadow:var(--shadow);color:inherit;text-decoration:none;overflow:hidden;outline:none;
+  animation:panelIn .6s var(--ease) both;animation-delay:calc(var(--i) * 70ms + 90ms);
+  transition:transform .22s var(--ease),border-color .2s,box-shadow .22s var(--ease)}
+.arac::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent) no-repeat;background-size:40% 100%;opacity:0;transition:opacity .2s}
+.arac:hover,.arac:focus-visible{transform:translateY(-3px);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.arac:hover::before,.arac:focus-visible::before{opacity:1;animation:sweep 1.1s var(--ease) infinite}
+.arac:focus-visible{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent),var(--shadow)}
+.arac.aciliyor{pointer-events:none}
+.arac.aciliyor::before{opacity:1;animation:sweep 1.1s var(--ease) infinite}
+.ikon{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none;transition:transform .3s var(--ease)}
+.arac:hover .ikon{transform:scale(1.06) rotate(-3deg)}
+.ikon svg{width:24px;height:24px}
+.ikon svg circle.n{fill:currentColor;stroke:none}
+.arac h2{font-size:16px;font-weight:650;letter-spacing:-.015em;margin:0 0 4px;line-height:1.3}
+.arac p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+.git{margin-top:auto;display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--muted);padding-top:12px;border-top:1px solid var(--line)}
+.git b{color:var(--accent);font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.git b svg{width:15px;height:15px;transition:transform .22s var(--ease)}
+.arac:hover .git b svg{transform:translateX(3px)}
+.kbd{font:600 11px/1 var(--font);color:var(--muted);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:3px 6px}
+.dip{margin-top:26px;text-align:center;color:var(--muted);font-size:12px;animation:panelIn .6s var(--ease) both;animation-delay:.45s}
+@media (max-width:560px){body.acik{padding:28px 16px}.ust h1{font-size:20px}.kbd{display:none}}
+</style>
+</head>
+<body>
+<main class="kart" id="kart" aria-labelledby="bas">
+  <div class="logo">
+    {{LOGO}}
+    <div><h1 id="bas">Araçlarım</h1><div class="alt">Mekanik tesisat araçları</div></div>
+  </div>
+  <form id="giris" autocomplete="off">
+    <p class="acik">Devam etmek için şifrenizi girin.</p>
+    <div class="alan"><label for="sifre">Şifre</label><input id="sifre" type="password" autocomplete="current-password" required autofocus>
+      <button type="button" class="goz" data-hedef="sifre" aria-label="Şifreyi göster">{{GOZ}}</button></div>
+    <button class="ana" id="gir" type="submit">Giriş</button>
+    <div class="hata" id="hata" role="alert" aria-live="polite"></div>
+  </form>
+  <div class="bag"><span>İçerik AES-256 ile şifreli</span><span>Hesap Merkezi şifresi</span></div>
+</main>
+
+<section id="liste" hidden aria-labelledby="bas2">
+  <header class="ust">
+    <div class="logo">
+      {{LOGO}}
+      <div><h1 id="bas2">Araçlarım</h1><div class="alt" id="sayi"></div></div>
+    </div>
+    <button type="button" class="hafif" id="cikis">Çıkış</button>
+  </header>
+  <nav class="izgara" id="izgara"></nav>
+  <p class="dip">Oturum bu sekme kapanınca biter · Araçlar aynı sekmede açılır, geri dönmek için tarayıcının geri tuşunu ya da sağ alttaki <b>Ana sayfa</b> düğmesini kullanın.</p>
+</section>
+{{VERI}}
+<script>
+(function(){
+'use strict';
+{{ORTAK_JS}}
+var IKON={{IKONLAR}};
+var OK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function goster(liste,otomatik){
+  var k=$('kart');
+  function degis(){
+    k.hidden=true;document.body.classList.add('acik');
+    $('sayi').textContent=liste.length+' araç';
+    $('izgara').innerHTML=liste.map(function(a,i){
+      return '<a class="arac" href="'+esc(a.dosya)+'" style="--i:'+i+'">'+
+        '<span class="ikon">'+(IKON[a.ikon]||IKON.varsayilan)+'</span>'+
+        '<div><h2>'+esc(a.ad)+'</h2><p>'+esc(a.aciklama)+'</p></div>'+
+        '<span class="git"><b>Aç '+OK+'</b>'+(i<9?'<span class="kbd">'+(i+1)+'</span>':'')+'</span></a>';
+    }).join('');
+    $('liste').hidden=false;
+    var ilk=document.querySelector('.arac');if(ilk)ilk.focus({preventScroll:true});
+  }
+  /* Kayıtlı oturumla açılışta giriş kartı hiç görünmeden liste gelir. */
+  if(otomatik){degis();return;}
+  k.classList.add('cikis');setTimeout(degis,280);
+}
+$('izgara').addEventListener('click',function(e){var a=e.target.closest('.arac');if(a&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey)a.classList.add('aciliyor');});
+document.addEventListener('keydown',function(e){
+  if($('liste').hidden||e.ctrlKey||e.metaKey||e.altKey||/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;
+  var n=+e.key;if(n>=1&&n<=9){var a=document.querySelectorAll('.arac')[n-1];if(a){a.classList.add('aciliyor');location.href=a.getAttribute('href');}}
+});
+$('cikis').addEventListener('click',function(){anahtarSil();location.reload();});
+/* Geri tuşuyla dönüldüğünde sayfa önbellekten gelir; "açılıyor" izi kalmasın. */
+window.addEventListener('pageshow',function(){document.querySelectorAll('.arac.aciliyor').forEach(function(a){a.classList.remove('aciliyor');});});
+girisBagla(async function(bits,json,otomatik){goster(JSON.parse(json),otomatik);},true);
+})();
+</script>
+</body></html>

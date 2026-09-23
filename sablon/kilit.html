@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="tr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Araçlarım — Giriş</title>
+<link rel="icon" href="{{FAVICON}}">
+<style>
+{{ORTAK_CSS}}
+</style>
+</head>
+<body>
+<main class="kart" id="kart" aria-labelledby="bas">
+  <div class="logo">
+    {{LOGO}}
+    <div><h1 id="bas">Araçlarım</h1><div class="alt">Bu araç şifreli</div></div>
+  </div>
+  <form id="giris" autocomplete="off">
+    <p class="acik">Açmak için şifrenizi girin.</p>
+    <div class="alan"><label for="sifre">Şifre</label><input id="sifre" type="password" autocomplete="current-password" required autofocus>
+      <button type="button" class="goz" data-hedef="sifre" aria-label="Şifreyi göster">{{GOZ}}</button></div>
+    <button class="ana" id="gir" type="submit">Giriş</button>
+    <div class="hata" id="hata" role="alert" aria-live="polite"></div>
+  </form>
+  <div class="bag"><span>İçerik AES-256 ile şifreli</span><a href="index.html">← Ana sayfa</a></div>
+</main>
+{{VERI}}
+<script>
+(function(){
+'use strict';
+{{ORTAK_JS}}
+girisBagla(async function(bits,html){document.open();document.write(html);document.close();});
+})();
+</script>
+</body></html>
