@@ -230,3 +230,80 @@ ${ZEMIN}
     console.log(`${dosya}: tema uygulandı`);
   }
 }
+
+// ---------- RTU seçim aracı ----------
+// Kendi değişken adlarını kullanır (--s1, --txt, --accent…); bunlar Hesap Merkezi paletine eşlenir.
+// Devre şeması SVG'si kendi açık zeminini taşır, koyu temada da okunur kalır.
+{
+  const dosya = 'kaynak/rtu.html';
+  let html = readFileSync(dosya, 'utf8');
+  if (html.includes(ISARET)) console.log(`${dosya}: zaten temalı, atlandı`);
+  else {
+    const { a, b } = styleBlogu(html);
+    let css = html.slice(a, b);
+    const RTU_KOK = `:root{
+  --bg:#f7f8fa;--s1:#fff;--s2:#f4f6f9;--s3:#eef1f5;--border:#e3e7ee;--border2:#d2d8e2;
+  --txt:#0d1117;--txt2:#56606d;--txt3:#8a93a0;
+  --accent:#4a57c9;--acc-dim:#eceefb;--acc-glow:rgba(74,87,201,.18);--on-accent:#fff;--accent-ink:#3441a8;
+  --cool:var(--accent);--cool-dim:var(--acc-dim);
+  --heat:#c2410c;--heat-dim:#fef1ea;--heat-ink:#9a3412;
+  --green:#12855c;--green-dim:#e7f5ee;--green-ink:#0b5c3f;
+  --amber:#8a6300;--amber-dim:#fdf5e4;--amber-ink:#6b4e00;
+  --red:#c0362c;--red-dim:#fdecea;
+  --ui:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --head:var(--ui);
+  --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px -14px rgba(16,24,40,.16);
+  --shadow-lift:0 2px 4px rgba(16,24,40,.04),0 16px 40px -12px rgba(16,24,40,.18);
+  --primary:var(--accent);--wash:rgba(74,87,201,.10);--gridc:rgba(13,17,23,.045);--ease:cubic-bezier(.16,1,.3,1);
+  color-scheme:light dark;
+}
+@media screen and (prefers-color-scheme:dark){:root{
+  --bg:#08090b;--s1:#101214;--s2:#16181c;--s3:#1c1f24;--border:#2a2e35;--border2:#353a42;
+  --txt:#e8eaed;--txt2:#aab1bc;--txt3:#7c8492;
+  --accent:#8b93f8;--acc-dim:#171a2e;--acc-glow:rgba(139,147,248,.25);--on-accent:#0a0b0e;--accent-ink:#b3b9fb;
+  --heat:#fb8a5a;--heat-dim:#2a170e;--heat-ink:#fdba8c;
+  --green:#4cc38a;--green-dim:#0e2419;--green-ink:#8fdcb6;
+  --amber:#f0b35a;--amber-dim:#271c0b;--amber-ink:#f7cf8f;
+  --red:#ff8d84;--red-dim:#2a1513;
+  --shadow:0 1px 3px rgba(0,0,0,.45),0 8px 24px -14px rgba(0,0,0,.7);
+  --shadow-lift:0 2px 6px rgba(0,0,0,.45),0 16px 40px -12px rgba(0,0,0,.7);
+  --wash:rgba(139,147,248,.16);--gridc:rgba(255,255,255,.035);
+}}`;
+    css = css.replace(/:root\{[\s\S]*?\n\}/, RTU_KOK);
+    const kok = css.indexOf(RTU_KOK) + RTU_KOK.length;
+    let govde = css.slice(kok);
+    for (const [r, s] of [
+      [/rgba\(255,255,255,\.86\)/g, 'color-mix(in srgb,var(--s1) 86%,transparent)'],
+      [/color:#04121f|color:#04160c/g, 'color:var(--on-accent)'],
+      [/(\.run-btn\{[^}]*?)color:#fff/, '$1color:var(--on-accent)'],
+      [/(\.stp\.cur \.stp-n\{[^}]*?)color:#fff/, '$1color:var(--on-accent)'],
+      [/#0952BD/g, 'color-mix(in srgb,var(--accent) 88%,#000)'],
+      [/#08479F/g, 'color-mix(in srgb,var(--accent) 78%,#000)'],
+      [/#BCD5FA/g, 'color-mix(in srgb,var(--accent) 30%,var(--s1))'],
+      [/#F5CDB6/g, 'color-mix(in srgb,var(--heat) 30%,var(--s1))'],
+      [/#B8E0CD/g, 'color-mix(in srgb,var(--green) 30%,var(--s1))'],
+      [/#EBD9A8|#F0DFB4/g, 'color-mix(in srgb,var(--amber) 30%,var(--s1))'],
+      [/#6B4E00|#5A4200/g, 'var(--amber-ink)'],
+      [/#0B4CA8/g, 'var(--accent-ink)'],
+      [/#0A6440/g, 'var(--green-ink)'],
+      [/#9A3412/g, 'var(--heat-ink)'],
+      [/#C9CFD8/g, 'var(--border2)'],
+      [/#AEB6C2/g, 'var(--txt3)'],
+    ]) govde = govde.replace(r, s);
+    css = css.slice(0, kok) + govde + `
+${ISARET}
+${ZEMIN}
+body{background:var(--bg)}
+.sidebar{animation:panelIn .5s var(--ease) backwards}
+.main>*:first-child{animation:panelIn .55s var(--ease) .06s backwards}
+.run-btn,.wiz-btn{transition:background .16s,filter .18s,transform .12s var(--ease),box-shadow .16s}
+.run-btn:hover,.wiz-btn.primary:hover:not(:disabled){filter:brightness(1.07);transform:translateY(-1px)}
+.card{transition:box-shadow .2s var(--ease),border-color .2s}
+::selection{background:color-mix(in srgb,var(--accent) 26%,transparent)}
+`;
+    html = html.slice(0, a) + css + html.slice(b);
+    writeFileSync(dosya, html);
+    console.log(`${dosya}: tema uygulandı`);
+  }
+}

@@ -70,6 +70,9 @@ const IKONLAR = {
   batarya: cizgi('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M10.5 5v14M14 5v14M17.5 5v14"/><path d="M1 9h2M1 15h2M21 9h2M21 15h2"/>'),
   order: cizgi('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9z"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"/>'),
   cfd: cizgi('<path d="M3 8h10a3 3 0 1 0-3-3"/><path d="M3 12h15a3 3 0 1 1-3 3"/><path d="M3 16h6"/>'),
+  rtu: cizgi('<rect x="3" y="7" width="18" height="12" rx="2"/><circle cx="15" cy="13" r="3.5"/><path d="M15 9.5v7M11.5 13h7"/><path d="M6 10.5h3M6 13h3M6 15.5h3"/><path d="M7 7V5h10v2"/>'),
+  nem: cizgi('<path d="M9 21a4 4 0 0 1-4-4c0-2.6 4-7 4-7s4 4.4 4 7a4 4 0 0 1-4 4z"/><path d="M15 4c1.2 1-1.2 2 0 3s-1.2 2 0 3M19 4c1.2 1-1.2 2 0 3s-1.2 2 0 3"/>'),
+  sukacagi: cizgi('<path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/><path d="M12 8.5s-2.5 2.7-2.5 4.4a2.5 2.5 0 0 0 5 0c0-1.7-2.5-4.4-2.5-4.4z"/>'),
   varsayilan: cizgi('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12h6M12 9v6"/>'),
 };
 const ORTAK_CSS = oku(join(KOK, 'sablon', 'ortak.css')).trim();

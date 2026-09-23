@@ -9,11 +9,12 @@ Hesap Merkezi ile aynı şifreyle korunan araç sitesi. Ana sayfaya bir kez giri
 | `docs/` | Yayınlanacak site: `index.html` (ana sayfa) ve şifreli araçlar | **Evet** |
 | `kaynak/` | Araçların şifresiz, temalı hâlleri, `hesap-merkezi.html` ve `araclar.json` (menü) | **Hayır** |
 | `yedek/` | Tema uygulanmadan önceki orijinal dosyalar | **Hayır** |
+| `eklenecekler/` | Siteye eklenmek üzere bırakılan ham HTML ve Excel dosyaları | **Hayır** |
 | `sablon/` | Ana sayfa ve kilit ekranı şablonları | Zararsız |
 | `sifrele.mjs` | `kaynak/` → `docs/` üretir | Zararsız |
 | `tema.mjs` | Hesap Merkezi temasını `kaynak/` araçlarına uygular (bir kez çalıştırıldı) | Zararsız |
 
-`.gitignore` dosyası `kaynak/` ve `yedek/` klasörlerini dışarıda bırakır.
+`.gitignore` dosyası `kaynak/`, `yedek/` ve `eklenecekler/` klasörlerini dışarıda bırakır.
 
 ## Siteyi üretme
 
