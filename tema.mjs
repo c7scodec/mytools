@@ -231,14 +231,10 @@ ${ZEMIN}
   }
 }
 
-// ---------- RTU seçim aracı ----------
+// ---------- RTU ön seçim aracı (v9) ----------
 // Kendi değişken adlarını kullanır (--s1, --txt, --accent…); bunlar Hesap Merkezi paletine eşlenir.
 // Devre şeması SVG'si kendi açık zeminini taşır, koyu temada da okunur kalır.
-{
-  const dosya = 'kaynak/rtu.html';
-  let html = readFileSync(dosya, 'utf8');
-  if (html.includes(ISARET)) console.log(`${dosya}: zaten temalı, atlandı`);
-  else {
+export function rtuTema(html) {
     const { a, b } = styleBlogu(html);
     let css = html.slice(a, b);
     const RTU_KOK = `:root{
@@ -302,8 +298,131 @@ body{background:var(--bg)}
 .card{transition:box-shadow .2s var(--ease),border-color .2s}
 ::selection{background:color-mix(in srgb,var(--accent) 26%,transparent)}
 `;
-    html = html.slice(0, a) + css + html.slice(b);
-    writeFileSync(dosya, html);
-    console.log(`${dosya}: tema uygulandı`);
-  }
+  html = html.slice(0, a) + css + html.slice(b);
+  return html;
+}
+
+/* ==========================================================================
+   RTU v10 — kabuk + iki uygulama (ön seçim v9, soğutma çevrimi)
+   eklenecekler/rtu_v10.html iki uygulamayı JS dizgisi olarak taşır. Üçünü de ayrı
+   ayrı temalayıp yeniden gömer; çıktı kaynak/rtu.html'dir. Kaynak dosyaya dokunulmaz,
+   bu yüzden betik her çalıştığında aynı sonucu verir.
+   ========================================================================== */
+
+// Çevrim aracının kendi paleti (--paper, --ink, --rule…) Hesap Merkezi'ne eşlenir.
+// Diyagram renkleri (basma/sıvı/emme hatları) anlam taşır; hue korunur, koyu zemin için açılır.
+const CYC_KOK = `:root{
+  --bg:#f7f8fa; --paper:#fff; --ink:#0d1117; --ink2:#56606d; --rule:#e3e7ee; --soft:#f4f6f9;
+  --on-ink:#fff;
+  --hpg:#c2410c; --hpl:#a15c07; --lp2:#0e7490; --lpg:#4a57c9; --off:#b8c0cb;
+  --ok:#12855c; --warn:#a15c07; --err:#c0362c;
+  --f:"Barlow",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,Arial,sans-serif;
+  --fc:"Barlow Semi Condensed","Barlow",ui-sans-serif,"Segoe UI",Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light dark;
+}
+@media screen and (prefers-color-scheme:dark){:root{
+  --bg:#08090b; --paper:#101214; --ink:#e8eaed; --ink2:#aab1bc; --rule:#2a2e35; --soft:#16181c;
+  --on-ink:#0a0b0e;
+  --hpg:#fb8a5a; --hpl:#f0b35a; --lp2:#5ec7e0; --lpg:#8b93f8; --off:#5a626d;
+  --ok:#4cc38a; --warn:#f0b35a; --err:#ff8d84;
+}}`;
+
+function cycTema(html) {
+  const { a, b } = styleBlogu(html);
+  let css = html.slice(a, b);
+  css = css.replace(/:root\{[\s\S]*?\n\}/, CYC_KOK);
+  const kok = css.indexOf(CYC_KOK) + CYC_KOK.length;
+  let govde = css.slice(kok);
+  // --ink zemin üstündeki beyaz yazılar koyu temada okunmaz; tek değişkene bağlanır.
+  govde = govde.replace(/color:#fff\}/g, 'color:var(--on-ink)}');
+  govde = govde.replace(/\.pill\.ok\{background:#DDF1E7/, '.pill.ok{background:color-mix(in srgb,var(--ok) 16%,transparent)');
+  govde = govde.replace(/\.pill\.w\{background:#F8EBD3/, '.pill.w{background:color-mix(in srgb,var(--warn) 16%,transparent)');
+  govde = govde.replace(/\.pill\.e\{background:#F7DADB/, '.pill.e{background:color-mix(in srgb,var(--err) 16%,transparent)');
+  const zemin = ZEMIN
+    .replace(/var\(--wash\)/g, 'color-mix(in srgb,var(--lpg) 10%,transparent)')
+    .replace(/var\(--primary\)/g, 'var(--lpg)')
+    .replace(/var\(--gridc\)/g, 'color-mix(in srgb,var(--ink) 4%,transparent)');
+  css = css.slice(0, kok) + govde + '\n' + ISARET + '\n' + zemin + `
+body{-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+.tb,.inputs,.sheet,.svgbox,.tw{animation:panelIn .5s cubic-bezier(.16,1,.3,1) backwards}
+.btn{transition:filter .18s,transform .12s cubic-bezier(.16,1,.3,1),background .16s}
+.btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.row input,.row select,.lt input,.lt select{transition:border-color .16s,box-shadow .16s,background .16s}
+.row input:focus,.row select:focus,.lt input:focus,.lt select:focus{outline:none;border-color:var(--lpg);box-shadow:0 0 0 3px color-mix(in srgb,var(--lpg) 18%,transparent)}
+::selection{background:color-mix(in srgb,var(--lpg) 26%,transparent)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+`;
+  html = html.slice(0, a) + css + html.slice(b);
+  // Şema ve P-h diyagramındaki sabit beyazlar: kutular kâğıt, pasif kutular yumuşak zemin.
+  html = html.replace(/fill="#fff"/g, 'fill="var(--paper)"');
+  html = html.replace(/'#EEF1F4'/g, "'var(--soft)'");
+  html = html.replace(/c: '#fff'/g, "c: 'var(--on-ink)'");
+  return html;
+}
+
+// Kabuk: üst şerit ve sekmeler. İçerik iframe'lerde olduğu için CSS'i küçüktür.
+function kabukTema(html) {
+  const { a, b } = styleBlogu(html);
+  const css = '\n' + ISARET + `
+:root{--bg:#f7f8fa;--s1:#fff;--bd:#e3e7ee;--bd2:#d2d8e2;--tx:#0d1117;--tx2:#56606d;
+ --ac:#4a57c9;--on-ac:#fff;--acd:#eceefb;--am:#a15c07;--amd:#fff6e5;--gr:#12855c;--grd:#e7f5ee;
+ --font:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+ --ease:cubic-bezier(.16,1,.3,1);color-scheme:light dark}
+@media screen and (prefers-color-scheme:dark){:root{--bg:#08090b;--s1:#101214;--bd:#2a2e35;--bd2:#353a42;--tx:#e8eaed;--tx2:#aab1bc;
+ --ac:#8b93f8;--on-ac:#0a0b0e;--acd:#171a2e;--am:#f0b35a;--amd:#271c0b;--gr:#4cc38a;--grd:#0e2419}}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--tx);font:13.5px/1.45 var(--font);letter-spacing:-.005em;-webkit-font-smoothing:antialiased}
+body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 14px;background:var(--s1);border-bottom:1px solid var(--bd)}
+header h1{font-size:14.5px;font-weight:650;letter-spacing:-.02em;margin-right:8px;white-space:nowrap}
+.tabs{display:flex;gap:5px}
+.tabs button{border:1px solid var(--bd);background:var(--s1);color:var(--tx2);padding:7px 13px;border-radius:999px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap;
+ transition:border-color .16s,color .16s,background .16s,transform .12s var(--ease)}
+.tabs button:hover{border-color:var(--bd2)}
+.tabs button.on{background:var(--ac);border-color:var(--ac);color:var(--on-ac)}
+.bridge{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bridge button{border:1px solid var(--ac);background:var(--ac);color:var(--on-ac);padding:7px 13px;border-radius:9px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap;
+ transition:filter .18s,transform .12s var(--ease),background .16s,border-color .16s}
+.bridge button:hover:not(:disabled){filter:brightness(1.07);transform:translateY(-1px)}
+.bridge button:disabled{background:var(--bd);border-color:var(--bd);color:var(--tx2);cursor:default}
+#durum{font-size:12.5px;color:var(--tx2);max-width:520px}
+#durum.w{color:var(--am)} #durum.ok{color:var(--gr)}
+main{flex:1;position:relative;min-height:0}
+iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--bg);display:none}
+iframe.on{display:block}
+#aktarRapor{display:none;position:absolute;right:14px;bottom:14px;max-height:65%;overflow:auto;z-index:5;background:var(--s1);border:1px solid var(--bd);border-radius:12px;
+ box-shadow:0 1px 3px rgba(16,24,40,.06),0 12px 34px -14px rgba(16,24,40,.28);padding:13px 15px;max-width:min(560px,calc(100% - 28px));font-size:12.5px;
+ animation:raporIn .35s var(--ease) backwards}
+@keyframes raporIn{from{opacity:0;transform:translateY(10px)}}
+@media screen and (prefers-color-scheme:dark){#aktarRapor{box-shadow:0 1px 3px rgba(0,0,0,.5),0 12px 34px -14px rgba(0,0,0,.8)}}
+#aktarRapor table{border-collapse:collapse;width:100%;margin-top:6px}
+#aktarRapor td{padding:4px 6px;border-bottom:1px solid var(--bd);vertical-align:top}
+#aktarRapor td:first-child{color:var(--tx2)}
+#aktarRapor .x{float:right;cursor:pointer;border:0;background:none;font-size:16px;color:var(--tx2)}
+@media (max-width:700px){header h1{width:100%}.bridge{margin-left:0;width:100%}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+`;
+  return html.slice(0, a) + css + html.slice(b);
+}
+
+{
+  const kaynakDosya = 'eklenecekler/rtu_v10.html', hedef = 'kaynak/rtu.html';
+  let kabuk = readFileSync(kaynakDosya, 'utf8');
+  const al = ad => {
+    const onek = `const ${ad} = `;
+    const i = kabuk.indexOf(onek + '"');
+    if (i < 0) throw new Error(ad + ' bulunamadı');
+    const j = kabuk.indexOf('";\n', i);
+    return { bas: i + onek.length, son: j + 1, html: JSON.parse(kabuk.slice(i + onek.length, j + 1)) };
+  };
+  // Gömülü dizgi: </script> kaçışı için < karakteri < olarak yazılır (kaynaktaki gibi).
+  const gom = h => JSON.stringify(h).replace(/</g, '\\u003c');
+  const v9 = al('APP_V9'), cyc = al('APP_CYC');
+  if (cyc.bas < v9.bas) throw new Error('beklenmeyen sıra');
+  kabuk = kabuk.slice(0, cyc.bas) + gom(cycTema(cyc.html)) + kabuk.slice(cyc.son);
+  kabuk = kabuk.slice(0, v9.bas) + gom(rtuTema(v9.html)) + kabuk.slice(v9.son);
+  writeFileSync(hedef, kabukTema(kabuk));
+  console.log(hedef + ': RTU v10 (kabuk + v9 + çevrim) temalandı');
 }
