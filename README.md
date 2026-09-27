@@ -14,6 +14,7 @@ Hesap Merkezi ile aynı şifreyle korunan araç sitesi. Ana sayfaya bir kez giri
 | `sifrele.mjs` | `kaynak/` → `docs/` üretir | Zararsız |
 | `tema.mjs` | Hesap Merkezi temasını araçlara uygular; `rtu.html`'i `eklenecekler/rtu_v10.html`'den üretir | Zararsız |
 | `ahu.mjs` | AHU Studio'nun ham sürümünü siteye hazırlar (kendi şifre kapısını kaldırır) | Zararsız |
+| `coz.mjs` | `sifrele.mjs`'in tersi: şifreli bir araçtan `kaynak/` dosyasını geri üretir | Zararsız |
 
 `.gitignore` dosyası `kaynak/`, `yedek/` ve `eklenecekler/` klasörlerini dışarıda bırakır.
 
@@ -42,6 +43,18 @@ Betik Hesap Merkezi şifresini sorar ve `kaynak/hesap-merkezi.html` dosyasının
    AHU Studio için `node ahu.mjs "eklenecekler/ahu studio.html"`, RTU için `node tema.mjs`.
 2. Yeni araç için `kaynak/araclar.json` dosyasına bir satır ekleyin (`dosya`, `ad`, `aciklama`, `ikon`).
 3. `node sifrele.mjs` komutunu yeniden çalıştırın.
+
+## Şifreli bir aracı geri açma
+
+Elinizde bir aracın yalnızca şifreli kopyası kaldıysa (ör. `docs/` içinden ya da GitHub'dan
+indirdiyseniz), şifresiz hâlini geri üretebilirsiniz:
+
+```
+node coz.mjs eklenecekler/order.html kaynak/order.html
+```
+
+Şifre sorulur. Tarayıcıda açıp **Ctrl+S** ile kaydetmek işe yaramaz — Chrome ekrandakini
+değil sunucudaki özgün (şifreli) dosyayı indirir.
 
 ## Şifre
 
