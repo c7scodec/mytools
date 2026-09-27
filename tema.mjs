@@ -426,3 +426,74 @@ iframe.on{display:block}
   writeFileSync(hedef, kabukTema(kabuk));
   console.log(hedef + ': RTU v10 (kabuk + v9 + çevrim) temalandı');
 }
+
+/* ==========================================================================
+   Otopark akış simülatörü
+   Kendi açık/koyu teması var; nötr renkler ve vurgu Hesap Merkezi paletine çekilir.
+   Simülasyon renkleri (jet, egzoz, taze hava, kapı, duvar, zemin) anlam taşır —
+   dokunulmaz. Canvas bu değişkenleri getComputedStyle ile okuduğu için çizim de uyar.
+   Kaynağa dokunulmaz; çıktı kaynak/otopark-akis.html.
+   ========================================================================== */
+const OTOPARK_SIM = '--jet: #0f6e8c; --exh: #c8412c; --sup: #2563a8; --door: #c9780f; --open: #2e8b57; --warn: #b3261e; --ok: #2f7d4f;';
+const OTOPARK_SIM_KOYU = '--jet: #5cc4e8; --exh: #f0735a; --sup: #6fa3e8; --door: #f0b04a; --open: #5fc48c; --warn: #f28b82; --ok: #6cc28f;';
+const OTOPARK_KOK = `:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #f7f8fa; --panel: #fff; --ink: #0d1117; --muted: #697585; --line: #e3e7ee;
+  --accent: #4a57c9; --accent-ink: #fff; --floor: #eef1f5; --wall: #31383f;
+  ${OTOPARK_SIM}
+  --wash: rgba(74,87,201,.10); --gridc: rgba(13,17,23,.045);
+  --shadow: 0 1px 2px rgba(16,24,40,.04), 0 8px 24px -14px rgba(16,24,40,.16);
+  --ease: cubic-bezier(.16,1,.3,1);
+  --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-num: var(--font);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #08090b; --panel: #101214; --ink: #e8eaed; --muted: #858c98; --line: #2a2e35;
+    --accent: #8b93f8; --accent-ink: #0a0b0e; --floor: #16181c; --wall: #aab1bc;
+    ${OTOPARK_SIM_KOYU}
+    --wash: rgba(139,147,248,.16); --gridc: rgba(255,255,255,.035);
+    --shadow: 0 1px 3px rgba(0,0,0,.45), 0 8px 24px -14px rgba(0,0,0,.7);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #08090b; --panel: #101214; --ink: #e8eaed; --muted: #858c98; --line: #2a2e35;
+  --accent: #8b93f8; --accent-ink: #0a0b0e; --floor: #16181c; --wall: #aab1bc;
+  ${OTOPARK_SIM_KOYU}
+  --wash: rgba(139,147,248,.16); --gridc: rgba(255,255,255,.035);
+  --shadow: 0 1px 3px rgba(0,0,0,.45), 0 8px 24px -14px rgba(0,0,0,.7);
+  color-scheme: dark;
+}`;
+
+{
+  const kaynakDosya = 'eklenecekler/otopark-akis-simulatoru.html', hedef = 'kaynak/otopark-akis.html';
+  let html = readFileSync(kaynakDosya, 'utf8').replace(/^﻿/, '');
+  const { a, b } = styleBlogu(html);
+  let css = html.slice(a, b);
+  const kokBas = css.indexOf(':root {');
+  const kokSon = css.indexOf('color-scheme: dark;\n}', css.indexOf(':root[data-theme="dark"]')) + 'color-scheme: dark;\n}'.length;
+  if (kokBas < 0 || kokSon < kokBas) throw new Error('otopark: :root blokları bulunamadı');
+  css = css.slice(0, kokBas) + OTOPARK_KOK + css.slice(kokSon) + '\n' + ISARET + '\n' + ZEMIN
+    .replace(/var\(--primary\)/g, 'var(--accent)') + `
+body{-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+h1{font-weight:650;letter-spacing:-.025em}
+.panel,.stage{border-radius:14px;box-shadow:var(--shadow)}
+.panel h2{font-weight:650;letter-spacing:-.015em}
+.wrap>h1,.wrap>.lede,.wrap>.bar,.stage,.grid>.panel{animation:panelIn .5s var(--ease) backwards}
+.wrap>.lede{animation-delay:.03s}.wrap>.bar{animation-delay:.06s}.stage{animation-delay:.09s}
+.grid>.panel:nth-child(2){animation-delay:.12s}.grid>.panel:nth-child(3){animation-delay:.15s}
+.seg button,.btn{border-radius:9px;font-weight:600;transition:border-color .16s,color .16s,background .16s,filter .18s,transform .12s var(--ease)}
+.seg button:hover:not([aria-pressed="true"]),.btn:hover:not(.primary){border-color:color-mix(in srgb,var(--accent) 45%,var(--line));color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.form input,.form select,.tbl input,.tbl select,textarea{border-radius:8px;transition:border-color .16s,box-shadow .16s,background .16s}
+.form input:focus,.form select:focus,.tbl input:focus,.tbl select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+::selection{background:color-mix(in srgb,var(--accent) 26%,transparent)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+`;
+  writeFileSync(hedef, html.slice(0, a) + css + html.slice(b));
+  console.log(hedef + ': tema uygulandı');
+}
